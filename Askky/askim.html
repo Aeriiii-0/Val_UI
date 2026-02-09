@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Valentine's Day </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400&family=Poppins:wght@300;400;600;700;800&family=Playfair+Display:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            font-family: 'Playfair Display', 'Poppins', serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            background: linear-gradient(45deg, #4A90E2, #5DADE2, #48C9B0, #3498DB, #4A90E2);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            color: rgba(255, 255, 255, 0.95);
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            font-weight: 700;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .screen {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* INTRO SCREEN */
+        #intro h1 {
+            font-size: clamp(1.5rem, 6vw, 2.8rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 0 1.5rem;
+            line-height: 1.5;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .arrow-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            touch-action: manipulation;
+        }
+
+        .arrow-btn:active {
+            transform: scale(0.95) translateY(5px);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .arrow-btn::after {
+            content: '↓';
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 700;
+        }
+
+        /* ENVELOPE SCREEN */
+        #envelope-screen {
+            position: relative;
+        }
+
+        .envelope-container {
+            position: relative;
+            cursor: pointer;
+            transform: rotate(-5deg);
+            transition: transform 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        .envelope-container:active {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .envelope {
+            width: min(300px, 80vw);
+            height: min(200px, 53vw);
+            background: white;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: min(150px, 40vw) solid transparent;
+            border-right: min(150px, 40vw) solid transparent;
+            border-top: min(100px, 26.5vw) solid #E8F5F9;
+            transform-origin: top center;
+            transition: transform 0.8s ease;
+            z-index: 10;
+        }
+
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50%;
+            background: white;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .envelope-seal {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: #FFB6C1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 11;
+            transition: opacity 0.3s ease;
+        }
+
+        .envelope.open .envelope-seal {
+            opacity: 0;
+        }
+
+        /* LETTER */
+        .letter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            padding: 1rem;
+        }
+
+        .letter-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .letter {
+            background: #FEFEFE;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+            border-radius: 4px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow-y: auto;
+            animation: letterPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .letter::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes letterPop {
+            0% { transform: scale(0.5) translateY(100px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .letter-header {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(2rem, 7vw, 3rem);
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: #1A4D6D;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .letter-body {
+            font-family: 'Georgia', serif;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            color: #1A4D6D;
+            font-weight: 400;
+            text-align: justify;
+            text-indent: 2em;
+        }
+
+        .letter-signature {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-weight: 400;
+            text-align: right;
+            color: #1A4D6D;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .next-btn {
+            background: #1A4D6D;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.8rem 2rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-family: 'Playfair Display', serif;
+            border-radius: 50px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            touch-action: manipulation;
+        }
+
+        .next-btn:active {
+            transform: translateY(-3px) scale(0.98);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* GALLERY SCREEN - VERTICAL ZIGZAG */
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+            padding: 2rem 1rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .polaroid {
+            background: white;
+            padding: 0.8rem;
+            padding-bottom: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transform-origin: center;
+            animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        .polaroid:active {
+            transform: scale(1.05) rotate(0deg) !important;
+        }
+
+        /* Zigzag pattern - alternating left and right */
+        .polaroid:nth-child(1) {
+            transform: rotate(-8deg) translateX(-15%);
+            animation-delay: 0s;
+        }
+
+        .polaroid:nth-child(2) {
+            transform: rotate(6deg) translateX(15%);
+            animation-delay: 0.5s;
+        }
+
+        .polaroid:nth-child(3) {
+            transform: rotate(-5deg) translateX(-10%);
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .polaroid img {
+            width: min(200px, 60vw);
+            height: min(200px, 60vw);
+            object-fit: cover;
+            display: block;
+            background: #F0F0F0;
+        }
+
+        /* TRANSITION TEXT */
+        .transition-text {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-weight: 800;
+            text-align: center;
+            animation: fadeInOut 1.5s ease;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.95);
+            padding: 0 1.5rem;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        /* QUESTION SCREEN */
+        .question-container {
+            text-align: center;
+            padding: 0 1.5rem;
+        }
+
+        .question-text {
+            font-size: clamp(2rem, 7vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 2rem;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .main-image {
+            width: min(300px, 70vw);
+            height: min(300px, 70vw);
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .choice-btn {
+            padding: 0.9rem 2rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 800;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            font-family: 'Playfair Display', 'Poppins', serif;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+            touch-action: manipulation;
+        }
+
+        .choice-btn:active {
+            transform: translateY(-3px) scale(0.98);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 1);
+        }
+
+        .choice-btn.no-btn {
+            transition: all 0.5s ease;
+        }
+
+        .choice-btn.hidden {
+            display: none;
+        }
+
+        /* CELEBRATION SCREEN */
+        .celebration-container {
+            text-align: center;
+            padding: 0 1.5rem;
+        }
+
+        .celebration-text {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 2rem;
+            animation: bounce 1s ease infinite;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .celebration-gif {
+            width: min(400px, 80vw);
+            height: min(400px, 80vw);
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* CONFETTI */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #FFB6C1;
+            position: absolute;
+            animation: confettiFall 3s linear;
+            pointer-events: none;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 480px) {
+            .polaroid {
+                padding: 0.6rem;
+                padding-bottom: 2rem;
+            }
+            
+            .letter-body {
+                text-indent: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- INTRO SCREEN -->
+    <div class="screen active" id="intro">
+        <h1>Hello, my cutest pie! :&gt;&gt;</h1>
+        <div class="arrow-btn" onclick="nextScreen('intro', 'envelope-screen')"></div>
+    </div>
+
+    <!-- ENVELOPE SCREEN -->
+    <div class="screen" id="envelope-screen">
+        <div class="envelope-container" onclick="openEnvelope()">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="envelope-body"></div>
+                <div class="envelope-seal">💙</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LETTER OVERLAY -->
+    <div class="letter-overlay" id="letter-overlay">
+        <div class="letter">
+            <div class="letter-header">My Dearest Kim,</div>
+            <div class="letter-body">
+                It still feels surreal that I get to experience these beautiful moments—and even more so that I get to experience them with you. 
+                <br><br>
+                Thank you for mustering the courage to talk to me, regardless of how nervous you might have been.
+                <br> <br>
+                I'm so glad you took the note bait.
+                <br> <br> Because it led me to someone who could possibly be my person.
+                <br> <br>
+                You are so free-spirited and kind; being around you feels like standing in a warm ray of sunshine.
+                <br> <br>
+                 You're someone I admire in itself.
+                  <br><br> Just by existing. <br> <br>
+                 Even in its bare slate.
+                <br> <br>
+                I'm so grateful to have met someone who meets me as deeply as I've always subconsciously wanted to be met, even without me having to ask. 
+                <br> <br>
+                You make me want to learn every habit, research every interest, and cook every one of your favorite meals. (And yes, I'd still bake for you, even knowing you're watching your weight hehe :))
+                <br> <br>
+                I want to know every inch of you. <br> <br>
+                What makes you happy, what makes you sad or mad, and how I can help carry the weight when things get rough.
+                <br> <br> I hope you know how sacred you are to me.
+                <br> <br> As you are something I wanna handle with so much love and utmost care, no matter how tough you make yourself appear to the rest of the world.
+                <br> <br>
+                Take this as a testament that I'll hold a space for your heart to always feel in its safest. To listen as much as I speak, and to love you not only the way that I know how, but also to how you wished to be.
+            </div>
+            <div class="letter-signature">All my love, Arra </div>
+            <button class="next-btn" onclick="closeLetterAndNext()">Next →</button>
+        </div>
+    </div>
+
+    <!-- GALLERY SCREEN -->
+    <div class="screen" id="gallery">
+        <div class="gallery-container" onclick="nextScreen('gallery', 'transition')">
+            <div class="polaroid">
+                <img src="alonte.jpg" alt="Memory 1">
+            </div>
+            <div class="polaroid">
+                <img src="tags.jpg" alt="Memory 2">
+            </div>
+            <div class="polaroid">
+                <img src="grounds.jpg" alt="Memory 3">
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSITION SCREEN -->
+    <div class="screen" id="transition">
+        <h1 class="transition-text" id="transition-text">waaaaait am shy hehehe</h1>
+    </div>
+
+    <!-- QUESTION SCREEN -->
+    <div class="screen" id="question">
+        <div class="question-container">
+            <h1 class="question-text" id="question-text">will u be my valentine?</h1>
+            <img src="cat.png" alt="Valentine" class="main-image">
+            <div class="button-container">
+                <button class="choice-btn" onclick="celebrate()">DEFINITELY</button>
+                <button class="choice-btn" onclick="celebrate()">YES YES YES</button>
+                <button class="choice-btn no-btn" id="no-btn" onclick="handleNo()">NOOOO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CELEBRATION SCREEN -->
+    <div class="screen" id="celebration">
+        <div class="celebration-container">
+            <h1 class="celebration-text">YIPPI TIPPI</h1>
+            <img src="helele.jpg" alt="Celebration" class="celebration-gif">
+        </div>
+    </div>
+
+    <script>
+        let noClickCount = 0;
+
+        function nextScreen(currentId, nextId) {
+            const current = document.getElementById(currentId);
+            const next = document.getElementById(nextId);
+            
+            current.classList.remove('active');
+            
+            setTimeout(() => {
+                next.classList.add('active');
+            }, 300);
+        }
+
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            const letterOverlay = document.getElementById('letter-overlay');
+            
+            envelope.classList.add('open');
+            
+            setTimeout(() => {
+                letterOverlay.classList.add('active');
+            }, 400);
+        }
+
+        function closeLetterAndNext() {
+            const letterOverlay = document.getElementById('letter-overlay');
+            letterOverlay.classList.remove('active');
+            
+            setTimeout(() => {
+                nextScreen('envelope-screen', 'gallery');
+            }, 500);
+        }
+
+        function startTransition() {
+            const messages = [
+                'okay, here',
+                'u ready?',
+                '3',
+                '2',
+                '1'
+            ];
+            
+            let index = 0;
+            const transitionText = document.getElementById('transition-text');
+            transitionText.textContent = 'waaaaait am shy hehehe';
+            
+            const interval = setInterval(() => {
+                if (index < messages.length) {
+                    transitionText.style.animation = 'none';
+                    setTimeout(() => {
+                        transitionText.textContent = messages[index];
+                        transitionText.style.animation = 'fadeInOut 1.5s ease';
+                    }, 50);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        nextScreen('transition', 'question');
+                    }, 800);
+                }
+            }, 1800);
+        }
+
+        // Auto-start transition when gallery is clicked
+        document.getElementById('gallery').addEventListener('click', function() {
+            setTimeout(() => {
+                startTransition();
+            }, 300);
+        });
+
+        function handleNo() {
+            const noBtn = document.getElementById('no-btn');
+            const questionText = document.getElementById('question-text');
+            
+            noClickCount++;
+            
+            const messages = [
+                'NOOO U NO LIKE ME ANYMORE?',
+                'WHAT?!??! AM GUNNA GET SAD?',
+                'U SURE BABY?'
+            ];
+            
+            const sizes = ['1rem', '0.9rem', '0.7rem'];
+            const paddings = ['0.8rem 2rem', '0.6rem 1.5rem', '0.4rem 1rem'];
+            
+            if (noClickCount <= 3) {
+                questionText.textContent = messages[noClickCount - 1];
+                noBtn.style.fontSize = sizes[noClickCount - 1];
+                noBtn.style.padding = paddings[noClickCount - 1];
+                
+                if (noClickCount === 3) {
+                    setTimeout(() => {
+                        noBtn.classList.add('hidden');
+                    }, 300);
+                }
+            }
+        }
+
+        function celebrate() {
+            nextScreen('question', 'celebration');
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const colors = ['#FFB6C1', '#B8E5F0', '#B2E6D4', '#A8E6CF', '#FFD700', '#FF69B4'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 4000);
+                }, i * 30);
+            }
+        }
+
+        // Prevent zoom on double tap for iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
